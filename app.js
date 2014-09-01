@@ -2,12 +2,14 @@ var nconf = require('nconf')
 var bodyParser = require('body-parser')
 var dataUriToBuffer = require('data-uri-to-buffer')
 var express = require('express')
-var uuid = require('uuid')
-var gm = require('gm')
 var app = express()
 
 var exec = require('child_process').exec
+var Canvas = require('canvas')
+var Image = Canvas.Image
 var fs = require('fs')
+
+var sprite = fs.readFileSync('sprites/megaman.png')
 
 nconf.argv().env().file({
   file: 'local.json'
@@ -23,83 +25,61 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
 
-function chillOut(req, res) {
-  console.log('chillout, bro')
-  res.json(req.body)
-  return false
+function megamanize(buffer) {
+  var img = new Image
+  img.src = buffer
+
+  var width = 320
+  var height = 240
+  
+  var canvas = new Canvas(width, height)
+  var ctx = canvas.getContext('2d')
+  var sprite_img = new Image
+  sprite_img.src = sprite
+
+  // draw the original image
+  ctx.drawImage(img, 0, 0, width, height)
+  
+  // we'll do two passes
+  for( var j = 0; j < 2; j++ ) {
+    var sprite_x = 0;
+    // add five megamans, looping horizontally over the sprite sheet
+    for( i = 0; i < 5; i++ ) {
+      // upscale the sprite
+      var upscale = Math.floor(Math.random()*2)+1
+      var sprite_width = 42 * upscale
+      var sprite_height = 48 * upscale
+      
+      // randomize the alpha
+      ctx.globalAlpha = Math.random()*1
+
+      // draw it
+      ctx.drawImage(
+        sprite_img,
+        sprite_x,
+        0,
+        42,
+        48,
+        Math.floor(Math.random()*(width-sprite_width)),
+        Math.floor(Math.random()*(height-sprite_height)),
+        sprite_width,
+        sprite_height
+      )
+      sprite_x += 42
+    }
+  }
+
+  var buffer = canvas.toDataURL()
+  return buffer
 }
 
-var chill
 app.post('/service', function(req, res) {
+  var buffer = dataUriToBuffer(req.body.content.data)
+  var mega = megamanize(buffer)
 
-  if (chill) {
-    chillOut(req, res)
-    return false
-  }
-
-  chill = true
-
-  var i = 0
-  var frames = 5
-  var upscale = (Math.floor(Math.random() * 8)) + 2
-  var types = ['over', 'plus', 'minus']
-  var buff = dataUriToBuffer(req.body.content.data)
-
-  var width = 400
-
-  var s_width = 42 * upscale
-  var s_height = 48 * upscale
-  var x = Math.floor(Math.random() * (width - s_width))
-  var y = Math.floor(Math.random() * (width - s_height))
-
-  // Functions
-
-  function handle(error) {
-    console.log(error)
-  }
-
-  function cleanUp() {
-    exec('rm *.png *.gif', function(error, stdout, stderr) {
-      if (error) handle(error)
-      chill = false
-      console.log('ding, fries are done!')
-    })
-  }
-
-  function processFrame() {
-    var png = uuid.v1() + '.png'
-    var gif = uuid.v1() + '.gif'
-
-    gm(buff)
-      .resize(width)
-      .command('composite')
-      .in('-geometry', s_height + 'x' + s_width + '+' + x + '+' + y)
-      .in('-compose', types[Math.floor(Math.random() * types.length)])
-      .in('sprites/megaman/frame_' + i + '.gif')
-      .write(png, function(error) {
-        if (error) handle(error)
-        console.log('poop!')
-        i++
-        if (i >= frames) {
-          gm()
-            .command('convert')
-            .out('*.png')
-            .write(gif, function(error) {
-              if (error) handle(error)
-              var final_buffer = fs.readFileSync(gif)
-              var dataUri = 'data:image/gif;base64,' + final_buffer.toString('base64')
-              req.body.content.data = dataUri
-              res.json(req.body)
-              cleanUp()
-            })
-        } else {
-          processFrame()
-        }
-      })
-  }
-
-  // (╯°□°）╯︵sʞɔɐqןןɐɔ
-  processFrame()
+  req.body.content.data = mega;
+  req.body.content.type = buffer.type
+  res.json(req.body)
 })
 
 var port = nconf.get('port')
