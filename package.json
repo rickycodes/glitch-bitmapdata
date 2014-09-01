@@ -10,11 +10,10 @@
   "license": "GPL3",
   "dependencies": {
     "body-parser": "^1.6.7",
+    "canvas": "^1.1.6",
     "data-uri-to-buffer": "0.0.3",
     "express": "^4.8.7",
-    "gm": "^1.16.0",
-    "nconf": "^0.6.9",
-    "uuid": "^1.4.1"
+    "nconf": "^0.6.9"
   },
   "devDependencies": {
     "nodemon": "^1.2.1"
