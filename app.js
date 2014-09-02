@@ -29,9 +29,9 @@ function megamanize(buffer) {
   var img = new Image
   img.src = buffer
 
-  var width = 320
-  var height = 240
-  
+  var ratio = img.width / img.height
+  var width = 640
+  var height = width / ratio
   var canvas = new Canvas(width, height)
   var ctx = canvas.getContext('2d')
   var sprite_img = new Image
@@ -39,19 +39,19 @@ function megamanize(buffer) {
 
   // draw the original image
   ctx.drawImage(img, 0, 0, width, height)
-  
-  // we'll do two passes
-  for( var j = 0; j < 2; j++ ) {
-    var sprite_x = 0;
+
+  // we'll do three passes
+  for (var j = 0; j < 3; j++) {
+    var sprite_x = 0
     // add five megamans, looping horizontally over the sprite sheet
-    for( i = 0; i < 5; i++ ) {
+    for (i = 0; i < 5; i++) {
       // upscale the sprite
-      var upscale = Math.floor(Math.random()*2)+1
+      var upscale = Math.floor(Math.random() * 4) + 1
       var sprite_width = 42 * upscale
       var sprite_height = 48 * upscale
-      
+
       // randomize the alpha
-      ctx.globalAlpha = Math.random()*1
+      ctx.globalAlpha = Math.random() * 1
 
       // draw it
       ctx.drawImage(
@@ -60,8 +60,9 @@ function megamanize(buffer) {
         0,
         42,
         48,
-        Math.floor(Math.random()*(width-sprite_width)),
-        Math.floor(Math.random()*(height-sprite_height)),
+        // randomize placement (x,y)
+        Math.floor(Math.random() * (width - sprite_width)),
+        Math.floor(Math.random() * (height - sprite_height)),
         sprite_width,
         sprite_height
       )
@@ -77,7 +78,7 @@ app.post('/service', function(req, res) {
   var buffer = dataUriToBuffer(req.body.content.data)
   var mega = megamanize(buffer)
 
-  req.body.content.data = mega;
+  req.body.content.data = mega
   req.body.content.type = buffer.type
   res.json(req.body)
 })
