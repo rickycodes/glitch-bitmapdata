@@ -6,6 +6,7 @@ var app = express()
 
 var exec = require('child_process').exec
 var Canvas = require('canvas')
+var GifEncoder = require('gif-encoder')
 var Image = Canvas.Image
 var fs = require('fs')
 
@@ -26,6 +27,13 @@ app.get('/', function(req, res) {
 })
 
 function megamanize(buffer) {
+
+}
+
+app.post('/service', function(req, res) {
+
+  var buffer = dataUriToBuffer(req.body.content.data)
+
   var img = new Image
   img.src = buffer
 
@@ -37,50 +45,60 @@ function megamanize(buffer) {
   var sprite_img = new Image
   sprite_img.src = sprite
 
-  // draw the original image
-  ctx.drawImage(img, 0, 0, width, height)
+  var gif = new GifEncoder(width, height, { 'highWaterMark' : 1048576 });
 
-  // we'll do three passes
-  for (var j = 0; j < 3; j++) {
-    var sprite_x = 0
-    // add five megamans, looping horizontally over the sprite sheet
-    for (i = 0; i < 5; i++) {
-      // upscale the sprite
-      var upscale = Math.floor(Math.random() * 6) + 1
-      var sprite_width = 24 * upscale
-      var sprite_height = 24 * upscale
+  gif.setDelay(120)
+  gif.setRepeat(0)
 
-      // randomize the alpha
-      ctx.globalAlpha = Math.random() * 1
+  gif.writeHeader()
 
-      // draw it
-      ctx.drawImage(
-        sprite_img,
-        sprite_x,
-        0,
-        24,
-        24,
-        // randomize placement (x,y)
-        Math.floor(Math.random() * (width - sprite_width)),
-        Math.floor(Math.random() * (height - sprite_height)),
-        sprite_width,
-        sprite_height
-      )
-      sprite_x += 24
-    }
+  var sprite_x = 0
+
+  // upscale the sprite
+  var upscale = 1
+  var sprite_width = 95 * upscale
+  var sprite_height = 95 * upscale
+
+  var xPos = Math.floor(Math.random() * (width - sprite_width))
+  var yPos = Math.floor(Math.random() * (height - sprite_height))
+
+  // loop horizontally over the sprite sheet
+  for (i = 0; i < 4; i++) {
+
+    // draw the original image
+    ctx.drawImage(img, 0, 0, width, height)
+
+    // randomize the alpha
+    // ctx.globalAlpha = Math.random() * 1
+
+    // draw it
+    ctx.drawImage(
+      sprite_img,
+      sprite_x,
+      0,
+      95,
+      95,
+      // randomize placement (x,y)
+      xPos,
+      yPos,
+      sprite_width,
+      sprite_height
+    )
+    sprite_x += 95
+    gif.addFrame(ctx.getImageData(0,0,width,height).data)
   }
 
-  var buffer = canvas.toDataURL()
-  return buffer
-}
+  gif.finish()
 
-app.post('/service', function(req, res) {
-  var buffer = dataUriToBuffer(req.body.content.data)
-  var mega = megamanize(buffer)
+  gif.on('readable', function() {
 
-  req.body.content.data = mega
-  req.body.content.type = buffer.type
-  res.json(req.body)
+    var buffer = gif.read()
+    var dataUri = 'data:image/gif;base64,' + buffer.toString('base64')
+    
+    req.body.content.data = dataUri
+    req.body.content.type = 'image/gif'
+    res.json(req.body)
+  })
 })
 
 var port = nconf.get('port')
