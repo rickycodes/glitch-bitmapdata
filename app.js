@@ -30,7 +30,7 @@ function megamanize(buffer) {
   img.src = buffer
 
   var ratio = img.width / img.height
-  var width = 640
+  var width = 420
   var height = width / ratio
   var canvas = new Canvas(width, height)
   var ctx = canvas.getContext('2d')
@@ -46,9 +46,9 @@ function megamanize(buffer) {
     // add five megamans, looping horizontally over the sprite sheet
     for (i = 0; i < 5; i++) {
       // upscale the sprite
-      var upscale = Math.floor(Math.random() * 4) + 1
-      var sprite_width = 42 * upscale
-      var sprite_height = 48 * upscale
+      var upscale = Math.floor(Math.random() * 6) + 1
+      var sprite_width = 24 * upscale
+      var sprite_height = 24 * upscale
 
       // randomize the alpha
       ctx.globalAlpha = Math.random() * 1
@@ -58,15 +58,15 @@ function megamanize(buffer) {
         sprite_img,
         sprite_x,
         0,
-        42,
-        48,
+        24,
+        24,
         // randomize placement (x,y)
         Math.floor(Math.random() * (width - sprite_width)),
         Math.floor(Math.random() * (height - sprite_height)),
         sprite_width,
         sprite_height
       )
-      sprite_x += 42
+      sprite_x += 24
     }
   }
 
