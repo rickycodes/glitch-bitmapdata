@@ -9,10 +9,11 @@
   "author": "",
   "license": "GPL3",
   "dependencies": {
-    "body-parser": "^1.6.7",
+    "body-parser": "^1.7.0",
     "canvas": "^1.1.6",
     "data-uri-to-buffer": "0.0.3",
     "express": "^4.8.7",
+    "gif-encoder": "^0.4.1",
     "nconf": "^0.6.9"
   },
   "devDependencies": {
