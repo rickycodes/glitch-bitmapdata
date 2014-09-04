@@ -28,12 +28,6 @@ app.get('/', function(req, res) {
 
 function megamanize(buffer) {
 
-}
-
-app.post('/service', function(req, res) {
-
-  var buffer = dataUriToBuffer(req.body.content.data)
-
   var img = new Image
   img.src = buffer
 
@@ -45,7 +39,10 @@ app.post('/service', function(req, res) {
   var sprite_img = new Image
   sprite_img.src = sprite
 
-  var gif = new GifEncoder(width, height, { 'highWaterMark' : 1048576 });
+  var hwm = 128 * 100 * 1024 // brycebaril told me to
+  var gif = new GifEncoder(width, height, {
+    'highWaterMark': hwm
+  })
 
   gif.setDelay(120)
   gif.setRepeat(0)
@@ -55,9 +52,8 @@ app.post('/service', function(req, res) {
   var sprite_x = 0
 
   // upscale the sprite
-  var upscale = 1
-  var sprite_width = 95 * upscale
-  var sprite_height = 95 * upscale
+  var sprite_width = 95
+  var sprite_height = 96
 
   var xPos = Math.floor(Math.random() * (width - sprite_width))
   var yPos = Math.floor(Math.random() * (height - sprite_height))
@@ -77,7 +73,7 @@ app.post('/service', function(req, res) {
       sprite_x,
       0,
       95,
-      95,
+      96,
       // randomize placement (x,y)
       xPos,
       yPos,
@@ -85,16 +81,23 @@ app.post('/service', function(req, res) {
       sprite_height
     )
     sprite_x += 95
-    gif.addFrame(ctx.getImageData(0,0,width,height).data)
+    gif.addFrame(ctx.getImageData(0, 0, width, height).data)
   }
 
   gif.finish()
+  return gif
+}
+
+app.post('/service', function(req, res) {
+
+  var buffer = dataUriToBuffer(req.body.content.data)
+  var gif = megamanize(buffer)
 
   gif.on('readable', function() {
 
     var buffer = gif.read()
     var dataUri = 'data:image/gif;base64,' + buffer.toString('base64')
-    
+
     req.body.content.data = dataUri
     req.body.content.type = 'image/gif'
     res.json(req.body)
