@@ -55,6 +55,7 @@ function PRNG() {
 function BitmapData(width, height, transparent, fillColor, canvas) {
 	this.width = width;
 	this.height = height;
+
 	this.rect = new Rectangle(0, 0, this.width, this.height);
 	this.transparent = transparent || false;
 
@@ -144,8 +145,8 @@ function BitmapData(width, height, transparent, fillColor, canvas) {
 			if(this.tex0 != null) gl.deleteTexture(this.tex0); 
 			this.tex0 = tex;
 			
-			this.glCanvas.setAttribute('width', image.width);
-			this.glCanvas.setAttribute('height', image.height);
+			// this.glCanvas.setAttribute('width', image.width);
+			// this.glCanvas.setAttribute('height', image.height);
 			this.glPixelArray = new Uint8Array(image.width * image.height * 4);
 		} else {
 			if(this.tex1 != null) gl.deleteTexture(this.tex1); 
@@ -1126,6 +1127,48 @@ function Point (x, y) {
 	return this;
 }
 
+/*
+ColorMatrixFilter
+*/
+function ColorMatrixFilter(matrix)
+{
+	this.matrix=matrix || [
+							1, 0, 0, 0, 0,
+							0, 1, 0, 0, 0,
+							0, 0, 1, 0, 0,
+							0, 0, 0, 1, 0
+						  ];
+	
+	this.run=function(sourceRect, image, copy)
+	{
+		var numPixel=image.length/4;
+		var m=this.matrix;
+		
+		for(var i=0;i<numPixel;i++)
+		{
+			var r=i*4;
+			var g=r+1;
+			var b=r+2;
+			var a=r+3;
+			
+			var oR=image[r];
+			var oG=image[g];
+			var oB=image[b];
+			var oA=image[a];
+			
+			image[r] = (m[0]  * oR) + (m[1]  * oG) + (m[2]  * oB) + (m[3]  * oA) + m[4];
+	 		image[g] = (m[5]  * oR) + (m[6]  * oG) + (m[7]  * oB) + (m[8]  * oA) + m[9];
+	 		image[b] = (m[10] * oR) + (m[11] * oG) + (m[12] * oB) + (m[13] * oA) + m[14];
+	 		image[b] = (m[15] * oR) + (m[16] * oG) + (m[17] * oB) + (m[18] * oA) + m[19];
+		}
+	}
+	
+	this.clone=function()
+	{
+		return new ColorMatrixFilter(this.matrix);
+	}
+}
+
 exports.BitmapData = BitmapData;
 exports.BlendMode = BlendMode;
 exports.BitmapDataChannel = BitmapDataChannel;
@@ -1137,3 +1180,5 @@ exports.Rectangle = Rectangle;
 exports.radianToDegree = radianToDegree;
 exports.degreeToRadian = degreeToRadian;
 exports.Matrix = Matrix;
+exports.Point = Point;
+exports.ColorMatrixFilter = ColorMatrixFilter;

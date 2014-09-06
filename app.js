@@ -4,7 +4,12 @@ var dataUriToBuffer = require('data-uri-to-buffer')
 var express = require('express')
 var app = express()
 
-var bmd = require('./BitmapData.js')
+var bitmapData = require('./BitmapData.js')
+
+var Rectangle = bitmapData.Rectangle;
+var Point = bitmapData.Point;
+var BitmapDataChannel = bitmapData.BitmapDataChannel;
+var ColorMatrixFilter = bitmapData.ColorMatrixFilter;
 
 var exec = require('child_process').exec
 var Canvas = require('canvas')
@@ -33,20 +38,44 @@ function plurnt(buffer) {
   var img = new Image
   img.src = buffer
 
-  var ratio = img.width / img.height
+  /* var ratio = img.width / img.height
   var width = 420
-  var height = width / ratio
+  var height = width / ratio */
+
+  var width = img.width
+  var height = img.height
+
   var canvas = new Canvas(width, height)
   var ctx = canvas.getContext('2d')
 
   // draw the original image
   ctx.drawImage(img, 0, 0, width, height)
 
-  var bitmapData = new bmd.BitmapData(canvas.width, canvas.height)
+  var invertMatrix = [
+    -1, 0, 0, 0, 255,
+    0, -1, 0, 0, 255,
+    0, 0, -1, 0, 255,
+    0, 0, 0, 1, 0
+  ];
+             
+  var brightness = [
+    2, 0, 0, 0, 0,
+    0, 2, 0, 0, 0,
+    0, 0, 2, 0, 0,
+    0, 0, 0, 1, 0
+  ];
 
-  bitmapData.draw(img)
+  var invertFilter = new ColorMatrixFilter(invertMatrix);
+  var brightnessFilter = new ColorMatrixFilter(brightness);
 
-  console.log(bitmapData.drawingCanvas)
+  var zeroPoint = new Point();
+
+  var bmd = new bitmapData.BitmapData(width, height)
+  
+  bmd.draw(img)
+  bmd.applyFilter(bmd, bmd.rect, zeroPoint, invertFilter)
+
+  ctx.putImageData(bmd.data, 0, 0, 0, 0, width, height)
 
   var buffer = canvas.toDataURL()
   
