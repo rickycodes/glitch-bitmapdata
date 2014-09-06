@@ -75,7 +75,7 @@ function plurnt(buffer) {
   bmd.draw(img)
   bmd.applyFilter(bmd, bmd.rect, zeroPoint, invertFilter)
 
-  ctx.putImageData(bmd.data, 0, 0, 0, 0, width, height)
+  ctx.putImageData(bmd.data, 0, 0)
 
   var buffer = canvas.toDataURL()
   
