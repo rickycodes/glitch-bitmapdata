@@ -4,6 +4,8 @@ var dataUriToBuffer = require('data-uri-to-buffer')
 var express = require('express')
 var app = express()
 
+var bmd = require('./BitmapData.js')
+
 var exec = require('child_process').exec
 var Canvas = require('canvas')
 var GifEncoder = require('gif-encoder')
@@ -26,7 +28,7 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
 
-function megamanize(buffer) {
+function plurnt(buffer) {
 
   var img = new Image
   img.src = buffer
@@ -36,72 +38,29 @@ function megamanize(buffer) {
   var height = width / ratio
   var canvas = new Canvas(width, height)
   var ctx = canvas.getContext('2d')
-  var sprite_img = new Image
-  sprite_img.src = sprite
 
-  var hwm = 128 * 100 * 1024 // brycebaril told me to
-  var gif = new GifEncoder(width, height, {
-    'highWaterMark': hwm
-  })
+  // draw the original image
+  ctx.drawImage(img, 0, 0, width, height)
 
-  gif.setDelay(120)
-  gif.setRepeat(0)
+  var bitmapData = new bmd.BitmapData(canvas.width, canvas.height)
 
-  gif.writeHeader()
+  bitmapData.draw(img)
 
-  var sprite_x = 0
+  console.log(bitmapData.drawingCanvas)
 
-  // upscale the sprite
-  var sprite_width = 95
-  var sprite_height = 96
+  var buffer = canvas.toDataURL()
+  
+  return buffer
 
-  var xPos = Math.floor(Math.random() * (width - sprite_width))
-  var yPos = Math.floor(Math.random() * (height - sprite_height))
-
-  // loop horizontally over the sprite sheet
-  for (i = 0; i < 4; i++) {
-
-    // draw the original image
-    ctx.drawImage(img, 0, 0, width, height)
-
-    // randomize the alpha
-    // ctx.globalAlpha = Math.random() * 1
-
-    // draw it
-    ctx.drawImage(
-      sprite_img,
-      sprite_x,
-      0,
-      95,
-      96,
-      // randomize placement (x,y)
-      xPos,
-      yPos,
-      sprite_width,
-      sprite_height
-    )
-    sprite_x += 95
-    gif.addFrame(ctx.getImageData(0, 0, width, height).data)
-  }
-
-  gif.finish()
-  return gif
+  // will likely return gif later
 }
 
 app.post('/service', function(req, res) {
-
-  var buffer = dataUriToBuffer(req.body.content.data)
-  var gif = megamanize(buffer)
-
-  gif.on('readable', function() {
-
-    var buffer = gif.read()
-    var dataUri = 'data:image/gif;base64,' + buffer.toString('base64')
-
-    req.body.content.data = dataUri
-    req.body.content.type = 'image/gif'
-    res.json(req.body)
-  })
+  var imgBuff = dataUriToBuffer(req.body.content.data)
+  var turnt = plurnt(imgBuff);
+  req.body.content.data = turnt;
+  req.body.content.type = imgBuff.type
+  res.json(req.body)
 })
 
 var port = nconf.get('port')
