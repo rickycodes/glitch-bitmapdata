@@ -6,8 +6,10 @@ var app = express()
 
 var bitmapData = require('./BitmapData.js')
 
-var Rectangle = bitmapData.Rectvar Point = bitmapData.
-var ColorMatrixFilter = bitmapData.ColorMatrixF
+var Point = bitmapData.Point
+var Rectangle = bitmapData.Rectangle
+var ColorMatrixFilter = bitmapData.ColorMatrixFilter
+
 var exec = require('child_process').exec
 var Canvas = require('canvas')
 var GifEncoder = require('gif-encoder')
