@@ -67,17 +67,15 @@ function colorize(buffer) {
         0, 0, 2*i+1, 0, 0,
         0, 0, 0, 1, 0
       ]
-    
+
     var filter = new ColorMatrixFilter(matrix)
     
     bmd.draw(img)
     bmd.applyFilter(bmd, bmd.rect, zeroPoint, filter)
     
-    ctx.putImageData(bmd.data, 0, 0, 0, 0, width, height)  
-    
-    gif.addFrame(ctx.getImageData(0, 0, width, height).data)
+    ctx.putImageData(bmd.data, 0, 0, 0, 0, width, height)
 
-    console.log('addFrame')
+    gif.addFrame(ctx.getImageData(0, 0, width, height).data)
   }
 
   gif.finish()
@@ -152,7 +150,6 @@ function LSD(buffer) {
 
     ctx.putImageData(bmd.data, 0, 0)
     gif.addFrame(ctx.getImageData(0, 0, width, height).data)
-    console.log('addFrame')
   }
 
   gif.finish()
@@ -169,9 +166,6 @@ app.post('/service', function(req, res) {
   var gif = (randomEffect)(imgBuff)
 
   gif.on('readable', function() {
-
-    console.log('go!')
-
     var buffer = gif.read()
     var dataUri = 'data:image/gif;base64,' + buffer.toString('base64')
 
