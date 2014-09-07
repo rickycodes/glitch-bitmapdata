@@ -6,11 +6,8 @@ var app = express()
 
 var bitmapData = require('./BitmapData.js')
 
-var Rectangle = bitmapData.Rectangle;
-var Point = bitmapData.Point;
-
-var ColorMatrixFilter = bitmapData.ColorMatrixFilter;
-
+var Rectangle = bitmapData.Rectvar Point = bitmapData.
+var ColorMatrixFilter = bitmapData.ColorMatrixF
 var exec = require('child_process').exec
 var Canvas = require('canvas')
 var GifEncoder = require('gif-encoder')
@@ -69,8 +66,8 @@ function colorize(buffer) {
         0, 2*i+1, 0, 0, 0,
         0, 0, 2*i+1, 0, 0,
         0, 0, 0, 1, 0
-      ];
-
+      ]
+    
     var filter = new ColorMatrixFilter(matrix)
     
     bmd.draw(img)
