@@ -30,7 +30,7 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
 
-function setupIMG(buffer) {
+function getIMG(buffer) {
   var img = new Image
   img.src = buffer
   return img
@@ -38,7 +38,7 @@ function setupIMG(buffer) {
 
 function colorize(buffer) {
   
-  var img = setupIMG(buffer)
+  var img = getIMG(buffer)
 
   var width = img.width
   var height = img.height
@@ -90,7 +90,7 @@ function colorize(buffer) {
 
 function LSD(buffer) {
 
-  var img = setupIMG(buffer)
+  var img = getIMG(buffer)
 
   var width = img.width
   var height = img.height
@@ -168,8 +168,6 @@ app.post('/service', function(req, res) {
 
   var effects = [ colorize, LSD ]
   var randomEffect = effects[Math.floor(Math.random()*effects.length)]
-
-  // (randomEffect)()
 
   var gif = (randomEffect)(imgBuff)
 
