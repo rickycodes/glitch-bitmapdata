@@ -42,4 +42,4 @@ or
 Thanks
 ------
 
-All the other people who've submitted services to hub.revisit.link espeically: [@brycebaril](https://github.com/brycebaril/) [@brenna](https://github.com/brenna/) [@kid-icarus](https://github.com/kid-icarus/) and [@kirbysayshi](https://github.com/kirbysayshi/) for inspiration!
+To all the other people who've submitted services to http://hub.revisit.link espeically: [@brycebaril](https://github.com/brycebaril/) [@brenna](https://github.com/brenna/) [@kid-icarus](https://github.com/kid-icarus/) and [@kirbysayshi](https://github.com/kirbysayshi/) for inspiration!
