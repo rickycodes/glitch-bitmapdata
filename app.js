@@ -35,16 +35,7 @@ function getIMG(buffer) {
   return img
 }
 
-function colorize(buffer) {
-  
-  var img = getIMG(buffer)
-
-  var width = img.width
-  var height = img.height
-
-  var canvas = new Canvas(width, height)
-  var ctx = canvas.getContext('2d')
-
+function getGif(width, height) {
   var hwm = 128 * 100 * 1024 // brycebaril told me to
   var gif = new GifEncoder(width, height, {
     'highWaterMark': hwm
@@ -54,6 +45,23 @@ function colorize(buffer) {
   gif.setRepeat(0)
 
   gif.writeHeader()
+
+  return gif
+}
+
+function colorize(buffer) {
+
+  console.time('colorize')
+  
+  var img = getIMG(buffer)
+
+  var width = img.width
+  var height = img.height
+
+  var canvas = new Canvas(width, height)
+  var ctx = canvas.getContext('2d')
+
+  var gif = getGif(width, height)
 
   // draw the original image
   ctx.drawImage(img, 0, 0, width, height)
@@ -82,10 +90,14 @@ function colorize(buffer) {
 
   gif.finish()
 
+  console.timeEnd('colorize')
+
   return gif
 }
 
 function LSD(buffer) {
+
+  console.time('LSD')
 
   var img = getIMG(buffer)
 
@@ -95,15 +107,7 @@ function LSD(buffer) {
   var canvas = new Canvas(width, height)
   var ctx = canvas.getContext('2d')
 
-  var hwm = 128 * 100 * 1024 // brycebaril told me to
-  var gif = new GifEncoder(width, height, {
-    'highWaterMark': hwm
-  })
-
-  gif.setDelay(120)
-  gif.setRepeat(0)
-
-  gif.writeHeader()
+  var gif = getGif(width, height)
 
   // draw the original image
   ctx.drawImage(img, 0, 0, width, height)
@@ -156,13 +160,15 @@ function LSD(buffer) {
 
   gif.finish()
 
+  console.timeEnd('LSD')
+
   return gif
 }
 
 app.post('/service', function(req, res) {
   var imgBuff = dataUriToBuffer(req.body.content.data)
 
-  var effects = [ colorize, LSD ]
+  var effects = [colorize, LSD]
   var randomEffect = effects[Math.floor(Math.random()*effects.length)]
 
   var gif = (randomEffect)(imgBuff)
