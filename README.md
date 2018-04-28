@@ -1,6 +1,8 @@
 bitmapData revisit.link service
 =================================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/rickycodes/glitch-bitmapdata.svg)](https://greenkeeper.io/)
+
 What is this?
 -------------
 
